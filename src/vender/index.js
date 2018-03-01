@@ -1,2 +1,5 @@
 
-require('../page/home/test.js');
+require('vue');
+import(/*webpackChunkName: 'lodash'*/'lodash');
+console.log('abccc');
+
