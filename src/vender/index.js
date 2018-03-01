@@ -1,3 +1,2 @@
 
-require('vue');
-require('lodash');
+require('../page/home/test.js');
