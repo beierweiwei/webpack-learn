@@ -1,3 +1,4 @@
 
 require('vue');
-require('lodash');
+import(/*webpackChunkName: 'lodash'*/'lodash');
+console.log('abccc')
