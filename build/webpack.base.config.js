@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var htmlWebpackPlugin = require('html-webpack-plugin');
+//var webpackModuleHotAccept = require('webpack-module-hot-accept');
 module.exports = {
   entry: {
     main: './src/app.js',
@@ -22,7 +23,14 @@ module.exports = {
   // },
   module: {
     rules: [
-      {test: /\.css$/, use: ['style-loader','css-loader']}//注意loader顺序从右至左
+      {test: /\.css$/, use: ['style-loader','css-loader']},//注意loader顺序从右至左
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: [
+          'webpack-module-hot-accept' // add this last,实现HMR
+        ]
+      }
     ]
   },
   plugins: [
@@ -41,7 +49,7 @@ module.exports = {
       template: './src/home.html'
     }),
     new webpack.NamedModulesPlugin(), //我们还添加了 NamedModulesPlugin，以便更容易查看要修补(patch)的依赖
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
   ],
 
 }

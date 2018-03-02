@@ -27,7 +27,8 @@
     "style-loader": "^0.20.2",
     "webpack": "^2.7.0",
     "webpack-cli": "^2.0.9",
-    "webpack-dev-server": "^2.7.1"
+    "webpack-dev-server": "^2.7.1",
+    "webpack-module-hot-accept": "^1.0.5"
   },
   "dependencies": {
     "jQuery": "^1.7.4",
