@@ -31,6 +31,7 @@
     "webpack-module-hot-accept": "^1.0.5"
   },
   "dependencies": {
+    "amfe-flexible": "^2.2.1",
     "jQuery": "^1.7.4",
     "lodash": "^4.17.5",
     "vue": "^2.5.13"
