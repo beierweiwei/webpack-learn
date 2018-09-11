@@ -1,3 +1,2 @@
-
-console.log('index');
+console.log('vendor');
 

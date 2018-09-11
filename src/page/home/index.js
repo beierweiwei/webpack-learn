@@ -1,2 +1,5 @@
-console.log('index');
+require('./home.js');
+console.log(' exe home.js');
+
+
 

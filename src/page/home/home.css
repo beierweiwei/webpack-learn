@@ -1,7 +1,14 @@
-body { color: #ff6600; font-size: 6px;;}
-.hello {
+:global(.globa-test) {color: #blue;};
+:local(.test) { background: red; }
+:local .test { color: green; }
+:local(.test .subTest) { color: green; }
+:local .test .subTest :global(.global-test) { color: blue; }
+body {
+	background: #ccc;
+}
+/*.hello {
     font-size: 12px;
     width: 100px;
     height: 100px;
     background-color: #f60;
-}
+}*/

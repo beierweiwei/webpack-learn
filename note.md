@@ -1,16 +1,23 @@
 # learn webpack note
+
+## 用例版本：4.7.2
+>[指南](https://webpack.docschina.org/guides/installation/)
+>[api](https://webpack.docschina.org/api/cli/)
+>[完整配置示例](https://webpack.docschina.org/configuration/)
+
 ## 概念
+* resolve: 用于帮助找到模块的绝对路径。一个模块可以作为另一个模块的依赖模块，然后被后者引用
 * chunk：每一个单独打包的文件可以成为chunk。
 * 入口chunk: 被打包后页面需要引入的包，相当于一个顶层依赖。
 * 模块：webpack中一切资源都可以作为模块。 cmd (require) amd(define,require) es2015 css(url @import) html(src)都可以视为模块依赖。非js模块需要使用对应的loader加载
-* loader: loader 描述了 webpack 如何处理 非 JavaScript(non-JavaScript) 模块，并且在bundle中引入这些依赖。loader通过（loader）预处理函数，为 JavaScript 生态系统提供了更多有力功能。用户现在可以更加灵活的引入细粒度逻辑，例如压缩(compression)、打包(package)、语言翻译(language translation)和其他更多。
+* loader: webpack自身只支持 JavaScript,而loader 描述了 webpack 如何处理 非 JavaScript(non-JavaScript) 模块，并且在bundle中引入这些依赖。loader通过（loader）预处理函数，为 JavaScript 生态系统提供了更多有力功能。用户现在可以更加灵活的引入细粒度逻辑，例如压缩(compression)、打包(package)、语言翻译(language translation)和其他更多。
 * 模块解析(Module Resolution)：
 * plugin: 如果loader是针对一中类型文件的处理，plugin则是会在整个编译打包阶段提供某种功能，所以plugin可以看作是loader的一种补充。
 * Source Maps: 源码和打包编译后的代码索引。当 JavaScript 异常抛出时，你会想知道这个错误发生在哪个文件的哪一行。然而因为 webpack 将文件输出为一个或多个 bundle，所以追踪这一错误会很不方便。
 * runtime: 在浏览器运行时，webpack 用来连接模块化的应用程序的所有代码。runtime 包含：在模块交互时，连接模块所需的加载和解析逻辑。包括浏览器中的已加载模块的连接，以及懒加载模块的执行逻辑。
 * mainifest: 当编译器(compiler)开始执行、解析和映射应用程序时，它会保留所有模块的详细要点。这个数据集合称为 "Manifest"，当完成打包并发送到浏览器时，会在运行时通过 Manifest 来解析和加载模块。无论你选择哪种模块语法，那些 import 或 require 语句现在都已经转换为 __webpack_require__ 方法，此方法指向模块标识符(module identifier)。通过使用 manifest 中的数据，runtime 将能够查询模块标识符，检索出背后对应的模块。
-## webpack.config配置项
 
+## webpack.config配置项
 ### 入口起点
 ```javascript
 config.entry = {
@@ -31,7 +38,7 @@ config.entry = {
  }
 ```
 *使用 CommonsChunkPlugin 为每个页面间的应用程序共享代码创建 bundle。由于入口起点增多，多页应用能够在入口起点重用大量代码/模块，这样可以极大的从这些这些技术受益。*
->根据经验：每个 HTML 文档只使用一个入口起点。
+*根据经验：每个 HTML 文档只使用一个入口起点。* 
 
 ### 打包输出output
 ```js
@@ -46,10 +53,20 @@ config.output = {
 loader对不同文件类型源码的编译能力，配置灵活，
 loader配置和写法：见`css-loader`示例
 
-### css-loader
-[style-loader](https://doc.webpack-china.org/loaders/style-loader) Adds CSS to the DOM by injecting a style tag
+*注意，loader 能够 import 导入任何类型的模块（例如 .css 文件），这是 webpack 特有的功能，其他打包程序或任务执行器的可能并不支持。我们认为这种语言扩展是有很必要的，因为这可以使开发人员创建出更准确的依赖关系图。* 
 
-[css-loader](http://www.css88.com/doc/webpack2/loaders/css-loader/)
+在更高层面，在 webpack 的配置中 loader 有两个特征：
+
+* test 属性，用于标识出应该被对应的 loader 进行转换的某个或某些文件。
+* use 属性，表示进行转换时，应该使用哪个 loader。
+
+*重要的是要记得，在 webpack 配置中定义 loader 时，要定义在 module.rules 中，而不是 rules。为了使你受益于此，如果没有按照正确方式去做，webpack 会给出警告。* 
+
+### loader特性
+
+### css-loader
+>[style-loader](https://doc.webpack-china.org/loaders/style-loader) Adds CSS to the DOM by injecting a style tag
+> [css-loader](https://github.com/webpack-contrib/css-loader)
 
 `npm install css-loader -D`
 
@@ -62,15 +79,23 @@ config.module = {
    ]
 }
 ```
+### css-module
+>[CSS Modules实践](https://segmentfault.com/a/1190000010301977)
+通过webpack对每个css文件（模块）中的选择器名称名进行一定扩展保证其唯一性，当通过css-loader解析时后require('xx.css')后的模块会返回把原始的选择器名和扩展后的名字映射的对象。
 
 ## resolove
-
+resolver 是一个库(library)，用于帮助找到模块的绝对路径。一个模块可以作为另一个模块的依赖模块，然后被后者引用，如下：
 * `resolve.modules：[]` 未指定模块路径时，会从此选项中搜索。默认为`node_modules`;
 * `resolve.alias: {}` 设置模块别名
 >http://www.css88.com/doc/webpack2/configuration/resolve/#resolveloader
+
+### resolve.mainFields
+
 ## plugins
 
 ### htmlWebpackPlugin
+[文档](https://github.com/jantimon/html-webpack-plugin#plugins)
+[默认模板](https://github.com/jaketrent/html-webpack-template/blob/86f285d5c790a6c15263f5cc50fd666d51f974fd/index.html)
 
 `npm install -D html-webpack-plugin`
 
@@ -223,7 +248,6 @@ new webpack.optimize.CommonsChunkPlugin({
 ```
 
 上面的代码中定义了两个入口，app和vender（公共库），plugins中使用CommonsChunkPlugin提取vende
-
 vender是我们提取出来的公共chunk，通常不会被修改，所以理应在每次编译后文件名保持一致。然而，我们尝试修改入口文件index.js会发现，vender的文件名会发生变化。
 
 原因呢上面提到过，由于每次编译会导致vender的module.id发生变化，内部的runtime代码随之发生改变。
@@ -315,9 +339,9 @@ module.exports = {
   ]
 }
 ```
-* 警告: ExtractTextPlugin 对 每个入口 chunk 都生成对应的一个文件, 所以当你配置多个入口 chunk 的时候，生成的文件名你必须使用 [name], [id] or [contenthash].
-### 打包分离公共库及缓存
+* 警告: ExtractTextPlugin 对 每个入口 chunk 都生成对应的一个文件, 所以当你配置多个入口 chunk 的时候，生成的文件名你必须使用 [name], [id] or [contenthash]
 
+### 打包分离公共库及缓存
 ```
 var webpack = require('webpack');
 var path = require('path');
@@ -344,8 +368,9 @@ module.exports = function(env) {
     }
 };
 ```
+
 ## 动态导入
-https://doc.webpack-china.org/guides/code-splitting/#-prevent-duplication-
+>[文档](https://doc.webpack-china.org/guides/code-splitting/#-prevent-duplication-)
 ```js
     var a = require('normal-dep');
     if ( module.hot ) {
@@ -360,9 +385,7 @@ https://doc.webpack-china.org/guides/code-splitting/#-prevent-duplication-
 ### require.ensure();
 动态加载的模块会被单独打包，而且 webpack.optimize.CommonsChunkPlugin插件不会抽取与其他chuanks公共的代码！
 
-
 ## 动态加载和公共代码分离
-
 公共代码抽离好处是多个入口文件的情况下，每个chunk中可能包含了大量的重复代码或模块，造成代码体积过大，还有浪费浏览器加载资源，在多页应用下，更无法缓存公共文件。
 动态延时加载，可以在代码执行时根据具体情况进行加载，按需加载的模块如果在入口chunk中未引用则代码会被单独打包。这样避免了一次性打包所有代码造成打包文件过大的问题。 同时存在一个或多个模块同时被同步和按需加载模块依赖，造成代码重复打包的问题。
 

@@ -6,7 +6,8 @@
 //
 // })
 require('amfe-flexible');
-require('./home.css');
-console.log(window.innerWidth);
+const style = require('./home.css');
+console.log(' exe home.js');
+alert(123)
 console.log(document.documentElement.clientWidth);
 
