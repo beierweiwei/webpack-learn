@@ -17,6 +17,9 @@
 * runtime: 在浏览器运行时，webpack 用来连接模块化的应用程序的所有代码。runtime 包含：在模块交互时，连接模块所需的加载和解析逻辑。包括浏览器中的已加载模块的连接，以及懒加载模块的执行逻辑。
 * mainifest: 当编译器(compiler)开始执行、解析和映射应用程序时，它会保留所有模块的详细要点。这个数据集合称为 "Manifest"，当完成打包并发送到浏览器时，会在运行时通过 Manifest 来解析和加载模块。无论你选择哪种模块语法，那些 import 或 require 语句现在都已经转换为 __webpack_require__ 方法，此方法指向模块标识符(module identifier)。通过使用 manifest 中的数据，runtime 将能够查询模块标识符，检索出背后对应的模块。
 
+## webpack默认构建信息
+当运行构建命令成功时，webpack默认会打印构建信息
+asset 列对应的是打包成单独的文件包，chunks为id名,
 ## webpack.config配置项
 ### 入口起点
 ```javascript
@@ -187,12 +190,14 @@ if(module.hot) module.hot.accept();
 
 > 如果你使用了 webpack-dev-middleware 而没有使用 webpack-dev-server，请使用 webpack-hot-middleware package 包，以在你的自定义服务或应用程序上启用 HMR。
 
-
 ### loader
 
 
 ## 代码分离(code split)
 代码分离是 webpack 中最引人注目的特性之一。此特性能够把代码分离到不同的 bundle 中，然后可以按需加载或并行加载这些文件。代码分离可以用于获取更小的 bundle，以及控制资源加载优先级，如果使用合理，会极大影响加载时间。
+
+### 分离manifes和runtime
+过使用 bundle 计算出内容散列(content hash)作为文件名称，这样在内容或文件修改时，浏览器中将通过新的内容散列指向新的文件，从而使缓存无效。一旦你开始这样做，你会立即注意到一些有趣的行为。即使表面上某些内容没有修改，计算出的哈希还是会改变。这是因为，runtime 和 manifest 的注入在每次构建都会发生变化。
 
 ### 提取公共js模块
 利用`CommonsChunkPlugin`将多个入口的公共代码分离出来
@@ -252,14 +257,9 @@ vender是我们提取出来的公共chunk，通常不会被修改，所以理应
 
 原因呢上面提到过，由于每次编译会导致vender的module.id发生变化，内部的runtime代码随之发生改变。
 
-
-
 解决方案有以下几种：
-
 　　1. 使用NamedModulesPlugin插件，用文件路径而非默认的数字ID来作为模块标识。
-
 　　2. 使用HashedModuleIdsPlugin插件，用相对路径的Hash值来作为模块标识。推荐在生产环境中使用。
-
 　　3. 将runtime部分的代码提取到一个单独的文件中，代码如下。
 ```js
  module.exports = {
@@ -341,6 +341,8 @@ module.exports = {
 ```
 * 警告: ExtractTextPlugin 对 每个入口 chunk 都生成对应的一个文件, 所以当你配置多个入口 chunk 的时候，生成的文件名你必须使用 [name], [id] or [contenthash]
 
+*webpack4.0使用[mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)来专门提取css*
+
 ### 打包分离公共库及缓存
 ```
 var webpack = require('webpack');
@@ -369,6 +371,20 @@ module.exports = function(env) {
 };
 ```
 
+### v4.0
+CommonsChunkPlugin 已经从 webpack v4（代号 legato）中移除
+此插件实现的功能通过optimization选项进行配置
+
+```
+  //提取公共代码库
+  optimization: {
+      splitChunks: {
+      chunks: 'all'
+    }
+  }
+```
+
+## tree shaking
 ## 动态导入
 >[文档](https://doc.webpack-china.org/guides/code-splitting/#-prevent-duplication-)
 ```js
@@ -376,7 +392,6 @@ module.exports = function(env) {
     if ( module.hot ) {
       require.ensure(['b'], function(require) {
         var c = require('c');
-
         // Do something special...
       });
     }
@@ -389,6 +404,27 @@ module.exports = function(env) {
 公共代码抽离好处是多个入口文件的情况下，每个chunk中可能包含了大量的重复代码或模块，造成代码体积过大，还有浪费浏览器加载资源，在多页应用下，更无法缓存公共文件。
 动态延时加载，可以在代码执行时根据具体情况进行加载，按需加载的模块如果在入口chunk中未引用则代码会被单独打包。这样避免了一次性打包所有代码造成打包文件过大的问题。 同时存在一个或多个模块同时被同步和按需加载模块依赖，造成代码重复打包的问题。
 
+## shim
+> [shim](https://webpack.docschina.org/guides/shimming/)
+
+### 全局变量
+
+```
+ plugins: [
+   new webpack.ProvidePlugin({
+     _: 'lodash'
+   })
+ ]
+```
+### 全局 exports
+我们可以使用 exports-loader，将一个全局变量作为一个普通的模块来导出
+
+### 加载 polyfills
+
+## 构建性能(https://webpack.docschina.org/guides/build-performance/#development)
+
+### babel
+>[如何使用babel](https://segmentfault.com/a/1190000014167121)
 ## 打包分析工具
 `[webpack-bundle-analyzer](https://github.com/th0r/webpack-bundle-analyzer)`
 可生成分析图
