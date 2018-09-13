@@ -1,18 +1,23 @@
-var path = require('path');
-var webpack = require('webpack');
-var htmlWebpackPlugin = require('html-webpack-plugin');
-
+const path = require('path');
+const webpack = require('webpack');
+const htmlWebpackPlugin = require('html-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 console.log('process.env.NODE_ENV' ,process.env.NODE_ENV)
 const devMode = process.env.NODE_ENV !== 'production'
 //var webpackModuleHotAccept = require('webpack-module-hot-accept');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const rootDir = path.resolve(__dirname, '../')
+
+const resolve = relativePath => path.resolve(rootDir, relativePath)
+const srcPath = resolve('src')
+
 module.exports = {
 	entry: {
-		main: './src/app.js',
+		main: './src/main.js',
 	},
 	output: {
-		filename: '[name].js',
-		chunkFilename: '[name].js', //非入口chunk命名
+		filename: devMode ? '[name].js' : '[name][hash].js',
+		chunkFilename: devMode ? '[name].js' : '[name][hash].js', //非入口chunk命名
 		path: path.resolve(__dirname, '../dist'),
 		publicPath: '/'
 	},
@@ -21,36 +26,37 @@ module.exports = {
 			{
 				test: /\.css$/, 
 				use: [
-					//devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-					'style-loader',
+					devMode ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
 					'css-loader'
 				]
 			},
 			{
 				test: /\.less$/,
 				use: [
-					//devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-					'style-loader',
+					devMode ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
 					'css-loader',
 					'less-loader'
 				]
 			},
 			{
+				test: /\.vue$/,
+				use: [{
+					loader: 'vue-loader',
+					options: {
+						transpileOptions: {
+							
+						}
+					}
+				}]
+			},
+			{
 				test: /\.js$/,
-				exclude: /node_modules/,
+				include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')],
 				use: { 
 					loader: 'babel-loader',
-					// options: {
-					// 	presets: [
-					// 		['env', {
-					// 			targets: {
-					// 				browsers: ['> 1%', 'last 2 versions']
-					// 			}
-					// 		}]
-					// 	]
-					// }
 				}
 			},
+
 			{
 				test: /\.(jpg|png|svg|gif)$/,
 				use: [{
@@ -66,20 +72,31 @@ module.exports = {
 					'file-loader'
 				]
 			}
-		]
+		],
+		noParse: function (context) {
+			return /(vue|vuex|vue-router|vuex-router-sync)$/.test(context)
+		}
 	},
 	plugins: [
 		new htmlWebpackPlugin({
 			title: 'learn webpack',
-			// template: path.resolve(__dirname, '../src/home.html')
+			filename: 'index.html',
+			template: path.resolve(__dirname, '../public/index.html')
 		}),
-		new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: devMode ? '[name].css' : '[name].[hash].css',
-      chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
-    })
+		new VueLoaderPlugin(),
+   	// new webpack.LoaderOptionsPlugin({
+    //      // test: /\.xxx$/, // may apply this only for some modules
+    //    options: {
+    //      noParse: …
+    //    }
+   	// })
 	],
+	resolve: {
+		extensions: ['.vue', '.js', '.json'],
+		alias: {
+			'@': path.resolve(rootDir, 'src')
+		}
+	},
 	optimization: {
 		splitChunks: {
 			chunks: 'all',
@@ -89,15 +106,14 @@ module.exports = {
 					name: 'vendors',
 					chunks: 'all'
 				},
-				// styles: {
-    //       name: 'styles',
-    //       test: /\.css$/,
-    //       chunks: 'all',
-    //       enforce: true
-    //     }
+				styles: {
+          name: 'styles',
+          test: /\.css$/,
+          chunks: 'all',
+          enforce: true
+        }
 			}
 		},
 		runtimeChunk: 'single',
 	}
-
 }

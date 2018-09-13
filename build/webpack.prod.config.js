@@ -26,8 +26,14 @@ module.exports = merge(baseConfig, {
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
 		new webpack.DefinePlugin({
-			//定义项目环境
+			//定义项目环境, process.env.NODE_ENV在webpack中为空，需要另外声明。
       'process.env.NODE_ENV': JSON.stringify('production')
+    }),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[name].css' : '[name].[hash].css',
     })
 	]
 })
