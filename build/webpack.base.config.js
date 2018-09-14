@@ -4,7 +4,6 @@ const htmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 console.log('process.env.NODE_ENV' ,process.env.NODE_ENV)
 const devMode = process.env.NODE_ENV !== 'production'
-//var webpackModuleHotAccept = require('webpack-module-hot-accept');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const rootDir = path.resolve(__dirname, '../')
 
@@ -41,17 +40,15 @@ module.exports = {
 			{
 				test: /\.vue$/,
 				use: [{
-					loader: 'vue-loader',
-					options: {
-						transpileOptions: {
-							
-						}
-					}
+					loader: 'vue-loader'
 				}]
 			},
 			{
 				test: /\.js$/,
-				include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')],
+				// include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')],
+			  exclude: file => (
+  				/node_modules/.test(file) && !/\.vue\.js/.test(file)
+				),
 				use: { 
 					loader: 'babel-loader',
 				}
@@ -67,15 +64,15 @@ module.exports = {
 				}]
 			},
 			{
-				test: /\.(woff|woff2|eot|ttr|otf)$/,
+				test: /\.(woff|woff2|eot|ttr|ttf|otf)$/,
 				use: [
 					'file-loader'
 				]
 			}
 		],
-		noParse: function (context) {
-			return /(vue|vuex|vue-router|vuex-router-sync)$/.test(context)
-		}
+		// noParse: function (context) {
+		// 	return /(vue|vuex|vue-router|vuex-router-sync)$/.test(context)
+		// }
 	},
 	plugins: [
 		new htmlWebpackPlugin({
@@ -92,9 +89,10 @@ module.exports = {
    	// })
 	],
 	resolve: {
-		extensions: ['.vue', '.js', '.json'],
+		extensions: ['*', '.vue', '.js', '.json'],
 		alias: {
-			'@': path.resolve(rootDir, 'src')
+			'@': path.resolve(rootDir, 'src'),
+			'vue$': 'vue/dist/vue.esm.js'
 		}
 	},
 	optimization: {

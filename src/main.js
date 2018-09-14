@@ -1,11 +1,11 @@
-
-// import Vue from 'vue'
-// import router from './router'
+import Vue from 'vue'
+import router from './router'
 import App from './App'
-
-// new Vue ({
-// 	el: '#app',
-// 	router,
-// 	components: {App},
-// 	template: App	
-// }) 
+import iView from 'iview';
+import 'iview/dist/styles/iview.css';
+Vue.use(iView);
+new Vue ({
+	el: '#app',
+	router,
+	render: h => h(App)
+}) 

@@ -4,12 +4,14 @@ const webpack = require('webpack');
 const path = require('path')
 module.exports = merge(baseConfig, {
 	mode: 'development',
-	devtool: 'inline-source-map',
+	//devtool: 'inline-source-map',
+    devtool: '#eval-source-map',
 	devServer: {
-		contentBase: "./dist",
 		hot: true,
-        publicPath: '/'
-
+        publicPath: '/',
+        historyApiFallback: true,
+        noInfo: true,
+        overlay: true
 	},
 	plugins: [
     // new webpack.optimize.CommonsChunkPlugin({
