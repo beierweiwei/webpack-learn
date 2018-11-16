@@ -423,6 +423,8 @@ CommonsChunkPlugin 已经从 webpack v4（代号 legato）中移除
 
 ## 构建性能(https://webpack.docschina.org/guides/build-performance/#development)
 
+### vue相关
+vue-template-compiler 配合vue-loader
 ### babel
 >[如何使用babel](https://segmentfault.com/a/1190000014167121)
 ## 打包分析工具

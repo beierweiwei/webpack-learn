@@ -3,8 +3,9 @@ const merge = require('webpack-merge');
 const baseConfig = require('./webpack.base.config.js')
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 module.exports = merge(baseConfig, {
-	//mode: 'production',
+	mode: 'production',
 	// module: {
 	// 	rules: [
 	// 		{
@@ -32,8 +33,8 @@ module.exports = merge(baseConfig, {
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
-      filename: devMode ? '[name].css' : '[name].[hash].css',
-      chunkFilename: devMode ? '[name].css' : '[name].[hash].css',
+      filename: '[name][hash].css',
+      chunkFilename: '[name][hash].css'
     })
 	]
 })
