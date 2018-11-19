@@ -25,6 +25,6 @@ module.exports = merge(baseConfig, {
     //   // (只使用这些 入口chunk)
     // }),
     new webpack.NamedModulesPlugin(), //我们还添加了 NamedModulesPlugin，以便更容易查看要修补(patch)的依赖
-    new webpack.HotModuleReplacementPlugin(),
+    new webpack.HotModuleReplacementPlugin()
   ]
 })

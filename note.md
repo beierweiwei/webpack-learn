@@ -48,7 +48,7 @@ config.entry = {
 config.output = {
     filename: 'bundle.js',
     path: '/home/proj/public/assets', //必须为绝对路径
-    chunkFilename: [id][name][hash][chunkhash], //非入口文件命名
+    chunkFilename: [id][name][hash][chunkhash], //非入口文件命名，被分离的块
 }
 ```
 
@@ -192,7 +192,6 @@ if(module.hot) module.hot.accept();
 
 ### loader
 
-
 ## 代码分离(code split)
 代码分离是 webpack 中最引人注目的特性之一。此特性能够把代码分离到不同的 bundle 中，然后可以按需加载或并行加载这些文件。代码分离可以用于获取更小的 bundle，以及控制资源加载优先级，如果使用合理，会极大影响加载时间。
 
@@ -234,20 +233,20 @@ new webpack.optimize.CommonsChunkPlugin({
 ```js
   module.exports = {
       entry: {
-          app: ‘./src/index.js‘,
+          app: './src/index.js',
           vender: [
-              ‘lodash‘,
-              ‘otherlib‘
+              'lodash',
+              'otherlib'
           ]
       },
       plugins: [
          new webpack.optimize.CommonsChunkPlugin({
-             name: ‘vender‘
+             name: 'vender'
          })
               ],
      output: {
-         filename: ‘[name].[chunkhash].js‘,     // 使用Hash来命名文件，实现文件缓存的功能。当文件内容发生变化，文件名会随之改变。
-         path: path.resolve(__dirname, ‘dist‘)
+         filename: '[name].[chunkhash].js',     // 使用Hash来命名文件，实现文件缓存的功能。当文件内容发生变化，文件名会随之改变。
+         path: path.resolve(__dirname, 'dist')
      }
  };
 ```
@@ -264,24 +263,24 @@ vender是我们提取出来的公共chunk，通常不会被修改，所以理应
 ```js
  module.exports = {
       entry: {
-          app: ‘./src/index.js‘,
+          app: './src/index.js',
           vender: [
-              ‘lodash‘
+              'lodash'
           ]
       },
       plugins: [
           new webpack.optimize.CommonsChunkPlugin({
-             name: ‘vender‘,
+             name: 'vender',
              minChunks: Infinity
          }),
          new webpack.optimize.CommonsChunkPlugin({
-             name: ‘manifest‘,
-             chunks: [‘vender‘]
+             name: 'manifest',
+             chunks: ['vender']
          })
      ],
      output: {
-         filename: ‘[name].[chunkhash].js‘,
-         path: path.resolve(__dirname, ‘dist‘)
+         filename: '[name].[chunkhash].js',
+         path: path.resolve(__dirname, 'dist')
      }
  };
 
@@ -396,7 +395,7 @@ CommonsChunkPlugin 已经从 webpack v4（代号 legato）中移除
       });
     }
 ```
-### import();
+### import()
 ### require.ensure();
 动态加载的模块会被单独打包，而且 webpack.optimize.CommonsChunkPlugin插件不会抽取与其他chuanks公共的代码！
 
@@ -416,15 +415,59 @@ CommonsChunkPlugin 已经从 webpack v4（代号 legato）中移除
    })
  ]
 ```
+
+### 细粒度 shimming
+当模块运行在 CommonJS 环境下这将会变成一个问题，也就是说此时的 this 指向的是 module.exports。在这个例子中，你可以通过使用 imports-loader 覆写 this：
+
+```js
+   module: {
+     rules: [
+       {
+         test: require.resolve('index.js'),
+         use: 'imports-loader?this=>window'
+       }
+     ]
+   },
+```
 ### 全局 exports
+
 我们可以使用 exports-loader，将一个全局变量作为一个普通的模块来导出
+
 
 ### 加载 polyfills
 
-## 构建性能(https://webpack.docschina.org/guides/build-performance/#development)
+## webpack 4.0
+>[4.0更新内容](https://github.com/webpack/webpack/releases/tag/v4.0.0)
+
+mode: development | production（默认）| none 会将`process.env.NODE_ENV`的值设为相应的值，并启动`NamedChunksPlugin`和`NamedMoudulesPlugin`。当mode设为production时，会自动启动生产环境的插件，比如关闭错误发送插件，开启js压缩插件。
+
+*如果你想要根据 webpack.config.js 中的 mode 量去影响编译行为，那你必须将导出对象，改为导出一个函数：* 
+```js
+var config = {
+  entry: './app.js'
+  //...
+};
+
+module.exports = (env, argv) => {
+
+  if (argv.mode === 'development') {
+    config.devtool = 'source-map';
+  }
+
+  if (argv.mode === 'production') {
+    //...
+  }
+
+  return config;
+};
+```
+>[https://webpack.docschina.org/concepts/mode/](模式)。
+
+## 构建性能
+>[文档](https://webpack.docschina.org/guides/build-performance/#development)
 
 ### vue相关
-vue-template-compiler 配合vue-loader
+vue-template-compiler 配合vue-loader。vue-template-compiler与vue版本一致
 ### babel
 >[如何使用babel](https://segmentfault.com/a/1190000014167121)
 ## 打包分析工具
